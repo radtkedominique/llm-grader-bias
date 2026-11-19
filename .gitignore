@@ -1,0 +1,32 @@
+# Daten (Urheberrecht: nicht committen, per Skript neu erzeugen)
+data/raw/*
+data/interim/*
+data/processed/*
+data/solutions/*
+data/gradings/*
+results/*
+!data/*/.gitkeep
+!results/.gitkeep
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Secrets
+.env
+*.key
+
+# OS / IDE
+.DS_Store
+.idea/
+.vscode/
+
+# Antwort-Cache der Modelle
+data/cache/
+data/pilot/*
+!data/pilot/.gitkeep

@@ -1,0 +1,152 @@
+# Modelle für Phase 2 (Lösen) und 3 (Korrigieren)
+#
+# Studiendesign: 3–4 Familien × 2 Größen (small, large). Jede Familie über DENSELBEN Zugang.
+# Schlüssel und Endpoints NUR in .env (siehe .env.example), nie hier.
+#
+# provider:
+#   azure              Azure OpenAI – model = Deployment-Name, base_url_env = Endpoint
+#   openai_compatible  OpenAI-kompatible API: OpenRouter, Ollama, LM Studio, Gemini (OpenAI-Endpoint)
+#   anthropic          Anthropic Messages API
+#   mock               Fake-Antworten zum Testen der Pipeline (kostenlos)
+#
+# Reasoning-Modelle (OpenAI o-/GPT-5-Reihe): temperature: null, token_param: max_completion_tokens
+# json_mode (Standard true): beim Korrigieren wird JSON erzwungen. Lehnt ein Endpoint das ab → json_mode: false
+#
+# Aktivieren: enabled: true. Welche Modelle es konkret werden, ist noch offen (Absprache Betreuer).
+
+defaults:
+  temperature: 0.0
+  max_tokens: 2000
+  seed: 1234
+  rpm: 30
+
+models:
+  # ---------------------------------------------------------------- Tests (kostenlos)
+  - id: mock-a-small
+    family: mock-a
+    size: small
+    provider: mock
+    model: mock
+    rpm: 100000
+    enabled: true
+  - id: mock-a-large
+    family: mock-a
+    size: large
+    provider: mock
+    model: mock
+    rpm: 100000
+    enabled: true
+  - id: mock-b-small
+    family: mock-b
+    size: small
+    provider: mock
+    model: mock
+    rpm: 100000
+    enabled: true
+  - id: mock-b-large
+    family: mock-b
+    size: large
+    provider: mock
+    model: mock
+    rpm: 100000
+    enabled: true
+  - id: mock-c-small
+    family: mock-c
+    size: small
+    provider: mock
+    model: mock
+    rpm: 100000
+    enabled: true
+  - id: mock-c-large
+    family: mock-c
+    size: large
+    provider: mock
+    model: mock
+    rpm: 100000
+    enabled: true
+
+  # ---------------------------------------------------------------- Lokal über Ollama
+  # ollama pull <modell>; Ollama läuft auf http://localhost:11434
+  - id: local-small
+    family: ollama-test
+    size: small
+    provider: openai_compatible
+    base_url: http://localhost:11434/v1
+    model: qwen3:4b              # Beispiel – beliebiges installiertes Modell
+    rpm: 600
+    enabled: false
+
+  # ---------------------------------------------------------------- OpenAI über Azure
+  - id: openai-large
+    family: openai
+    size: large
+    provider: azure
+    base_url_env: AZURE_OPENAI_SWEDEN_ENDPOINT
+    api_key_env: AZURE_OPENAI_API_KEY
+    model: DEPLOYMENT_NAME_GROSS          # Deployment-Name aus dem Azure-Portal
+    api_version: "2024-10-21"
+    temperature: null                     # bei Reasoning-Modellen nicht erlaubt
+    token_param: max_completion_tokens
+    max_tokens: 4000
+    enabled: false
+  - id: openai-small
+    family: openai
+    size: small
+    provider: azure
+    base_url_env: AZURE_OPENAI_SWEDEN_ENDPOINT
+    api_key_env: AZURE_OPENAI_API_KEY
+    model: DEPLOYMENT_NAME_KLEIN
+    api_version: "2024-10-21"
+    temperature: null
+    token_param: max_completion_tokens
+    max_tokens: 4000
+    enabled: false
+
+  # ---------------------------------------------------------------- Google Gemini (OpenAI-kompatibler Endpoint)
+  - id: google-large
+    family: google
+    size: large
+    provider: openai_compatible
+    base_url: https://generativelanguage.googleapis.com/v1beta/openai
+    api_key_env: GEMINI_API_KEY
+    model: MODELLNAME_GROSS              # z. B. ein Flash-Modell
+    seed: null
+    rpm: 5                               # Free Tier: sehr niedrig, aktuelle Limits in AI Studio prüfen
+    enabled: false
+  - id: google-small
+    family: google
+    size: small
+    provider: openai_compatible
+    base_url: https://generativelanguage.googleapis.com/v1beta/openai
+    api_key_env: GEMINI_API_KEY
+    model: MODELLNAME_KLEIN              # z. B. ein Flash-Lite-Modell
+    seed: null
+    rpm: 5
+    enabled: false
+
+  # ---------------------------------------------------------------- Anthropic Claude
+  - id: anthropic-large
+    family: anthropic
+    size: large
+    provider: anthropic
+    api_key_env: ANTHROPIC_API_KEY
+    model: MODELLNAME_GROSS
+    seed: null                           # Anthropic kennt keinen seed
+    enabled: false
+  - id: anthropic-small
+    family: anthropic
+    size: small
+    provider: anthropic
+    api_key_env: ANTHROPIC_API_KEY
+    model: MODELLNAME_KLEIN
+    seed: null
+    enabled: false
+
+  # ---------------------------------------------------------------- Alternative: alles über OpenRouter
+  # - id: openai-large
+  #   family: openai
+  #   size: large
+  #   provider: openai_compatible
+  #   base_url: https://openrouter.ai/api/v1
+  #   api_key_env: OPENROUTER_API_KEY
+  #   model: openai/MODELLNAME

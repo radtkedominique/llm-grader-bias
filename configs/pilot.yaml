@@ -1,0 +1,25 @@
+# Pilot-Auswahl
+# python -m llm_grader_bias.pilot --config configs/pilot.yaml
+
+dataset: data/processed/dataset.jsonl
+output: data/pilot/pilot.jsonl
+seed: 42
+
+# Quoten pro Aufgabentyp (Summe = Pilotgröße). RQ4 vergleicht die Typen, daher gleich groß.
+quotas:
+  sprache: 10
+  mint: 10
+  informatik: 10
+
+# Innerhalb eines Typs möglichst gleichmäßig über die Fächer verteilen
+balance_subjects: true
+
+# Kontamination: nur neuere Jahrgänge. Fächer ohne Prüfungsjahr (Beispielaufgaben) explizit erlauben.
+min_year: 2024
+allow_without_year: [informatik]
+
+# Höchstens so viele Teilaufgaben aus derselben Aufgabe (PDF) → weniger Klumpung
+max_per_task: 2
+
+# Sehr lange Kontexte (z. B. ganze Romanauszüge) treiben die Kosten; 0 = keine Grenze
+max_context_chars: 12000

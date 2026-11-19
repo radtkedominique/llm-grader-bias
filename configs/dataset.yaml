@@ -1,0 +1,68 @@
+# Konfiguration für den Datensatz-Build
+# python -m llm_grader_bias.dataset all --config configs/dataset.yaml
+
+paths:
+  raw: data/raw
+  interim: data/interim
+  processed: data/processed
+
+http:
+  user_agent: "llm-grader-bias/0.1 (DHBW Forschungsprojekt; Kontakt: siehe GitHub radtkedominique)"
+  delay_seconds: 1.0        # Pause zwischen Requests (höflich bleiben)
+  timeout_seconds: 60
+  retries: 3
+
+sources:
+  iqb:
+    enabled: true
+    overview_url: "https://www.iqb.hu-berlin.de/de/schule/aufgaben/sekii/"
+    # Fallback, falls die Fächer nicht von der Übersichtsseite erkannt werden
+    subjects:
+      deutsch: "https://www.iqb.hu-berlin.de/de/schule/aufgaben/sekii/abiturpr%C3%BCfungsaufgaben-deutsch/"
+      mathematik: "https://www.iqb.hu-berlin.de/de/schule/aufgaben/sekii/abiturpruefungsaufgaben-mathematik/"
+      englisch: "https://www.iqb.hu-berlin.de/de/schule/aufgaben/sekii/abiturpr%C3%BCfungsaufgaben-englisch/"
+      franzoesisch: "https://www.iqb.hu-berlin.de/de/schule/aufgaben/sekii/abiturpr%C3%BCfungsaufgaben-franz%C3%B6sisch/"
+      biologie: "https://www.iqb.hu-berlin.de/de/schule/aufgaben/sekii/abiturpr%C3%BCfungsaufgaben-biologie/"
+      chemie: "https://www.iqb.hu-berlin.de/de/schule/aufgaben/sekii/abiturpr%C3%BCfungsaufgaben-chemie/"
+      physik: "https://www.iqb.hu-berlin.de/de/schule/aufgaben/sekii/abiturpr%C3%BCfungsaufgaben-physik/"
+    max_pages_per_subject: 200   # Listen laden 12 Aufgaben pro ?page=N
+
+  isb_informatik:
+    enabled: true
+    # Illustrierende Prüfungsaufgaben Bayern ab 2026 – MIT Lösungsvorschlägen (Java/Python)
+    illupa:
+      - id: illupa_inf_gA
+        niveau: grundlegend
+        aufgabe_url: "https://www.isb.bayern.de/fileadmin/user_upload/Gymnasium/IlluPA/Inf/IlluPA_Informatik_Beispielaufgaben_gA.pdf"
+        loesung_url: "https://www.isb.bayern.de/fileadmin/user_upload/Gymnasium/IlluPA/Inf/IlluPA_Informatik_Loesungsvorschlaege_und_Erlaeuterungen_gA.pdf"
+      - id: illupa_inf_eA
+        niveau: erhoeht
+        aufgabe_url: "https://www.isb.bayern.de/fileadmin/user_upload/Gymnasium/IlluPA/Inf/IlluPA_Informatik_Beispielaufgaben_eA.pdf"
+        loesung_url: "https://www.isb.bayern.de/fileadmin/user_upload/Gymnasium/IlluPA/Inf/IlluPA_Informatik_Loesungsvorschlaege_und_Erlaeuterungen_eA.pdf"
+    # Original-Abiturprüfungen Bayern – nur Aufgaben, KEIN offizieller Erwartungshorizont.
+    # Nutzbar für die Bedingung "ohne Erwartungshorizont".
+    abitur:
+      base_url: "https://www.isb.bayern.de/fileadmin/user_upload/Gymnasium/Leistungserhebungen/Abiturpruefung/Informatik/"
+      years: [2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026]
+      # Dateinamen ändern sich über die Jahre; alle Muster werden probiert
+      filename_patterns:
+        - "Informatik_{year}_A.pdf"
+        - "informatik_{year}_a.pdf"
+        - "Informatik_{year}_a.pdf"
+        - "inf_{year}_a.pdf"
+        - "abituraufgaben_{year}_informatik.pdf"
+
+filters:
+  min_year: 2017                  # für die Hauptstudie später z.B. 2024 setzen (Kontamination)
+  include_beispielaufgaben: true  # IQB-Beispielaufgaben (ohne Prüfungsjahr)
+  # Aufgaben, deren Titel/Metadaten einen dieser Begriffe enthalten, werden übersprungen
+  # (geprüft werden Titel, Metadaten und URL/Dateiname)
+  exclude_keywords:
+    - "Hörverstehen"
+    - "Hoerverstehen"
+    - "Hörsehverstehen"
+    - "Hoersehverstehen"
+    - "Hörverstehens"
+    - "Listening"
+    - "compréhension de l'oral"
+    - "Hör-/Hörsehverstehen"

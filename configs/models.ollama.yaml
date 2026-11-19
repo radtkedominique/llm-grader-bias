@@ -1,0 +1,58 @@
+# Lokale Modelle über Ollama – kostenlos, zum Testen der Pipeline mit echten Modellen
+#
+# Einmalig die Modelle laden (zusammen ca. 11 GB):
+#   ollama pull llama3.2:1b
+#   ollama pull llama3.2:3b
+#   ollama pull gemma3:1b
+#   ollama pull gemma3:4b
+#   ollama pull qwen3:1.7b
+#   ollama pull qwen3:4b
+#
+# Ollama muss laufen (App geöffnet oder `ollama serve`). Dann:
+#   python -m llm_grader_bias.solve --models-config configs/models.ollama.yaml
+#   python -m llm_grader_bias.grade --models-config configs/models.ollama.yaml
+#
+# Nur ein Modell zum Ausprobieren:
+#   python -m llm_grader_bias.solve --models-config configs/models.ollama.yaml --models llama-small
+#
+# 3 Familien × 2 Größen, wie im Studiendesign. Andere Modelle: `ollama list` zeigt, was installiert ist,
+# einfach den Namen bei `model:` eintragen.
+
+defaults:
+  provider: openai_compatible
+  base_url: http://localhost:11434/v1
+  temperature: 0.0
+  seed: 1234
+  max_tokens: 4000   # 1500 war zu knapp: 8 von 30 Lösungen abgeschnitten
+  rpm: 600          # lokal kein Limit; die Geschwindigkeit bestimmt der Rechner
+  timeout: 600      # lange Antworten kleiner Modelle können dauern
+
+models:
+  - id: llama-small
+    family: meta
+    size: small
+    model: llama3.2:1b
+  - id: llama-large
+    family: meta
+    size: large
+    model: llama3.2:3b
+
+  - id: gemma-small
+    family: google
+    size: small
+    model: gemma3:1b
+  - id: gemma-large
+    family: google
+    size: large
+    model: gemma3:4b
+
+  - id: qwen-small
+    family: alibaba
+    size: small
+    model: qwen3:1.7b
+    max_tokens: 6000   # Qwen3 denkt vor der Antwort; das braucht zusätzliche Tokens
+  - id: qwen-large
+    family: alibaba
+    size: large
+    model: qwen3:4b
+    max_tokens: 6000   # Qwen3 denkt vor der Antwort; das braucht zusätzliche Tokens
