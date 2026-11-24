@@ -1,0 +1,32 @@
+# GPT-Modelle über den Haufe LiteLLM-Proxy (OpenAI-kompatibel)
+#
+# Schlüssel: HAI_PROXY_KEY in .env.
+#
+#   python -m llm_grader_bias.solve --models-config configs/models.litellm.yaml --models gpt-luna
+#   python -m llm_grader_bias.solve --models-config configs/models.litellm.yaml
+#   python -m llm_grader_bias.grade --models-config configs/models.litellm.yaml
+
+defaults:
+  provider: openai_compatible
+  base_url: https://litellm.dev.haufe.ai/v1
+  api_key_env: HAI_PROXY_KEY
+  temperature: null                 # GPT-6 sind Reasoning-Modelle; 0.0 testen, bei HTTP 400 null lassen
+  token_param: max_completion_tokens
+  seed: 1234
+  max_tokens: 4000
+  rpm: 30                           # an die Proxy-Limits anpassen
+  timeout: 300
+
+models:
+  - id: gpt-luna
+    family: openai
+    size: small
+    model: gpt-6-luna
+  - id: gpt-sol
+    family: openai
+    size: medium
+    model: gpt-6.2-sol
+  - id: gpt-terra
+    family: openai
+    size: large
+    model: gpt-6.1-terra

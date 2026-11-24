@@ -16,6 +16,9 @@ dependencies = [
     "pandas>=2.0",
     "numpy>=1.24",
     "matplotlib>=3.8",
+    "boto3>=1.44.10",
+    "python-dotenv>=1.2.4",
+    "openai>=3.58.0",
 ]
 
 [project.optional-dependencies]

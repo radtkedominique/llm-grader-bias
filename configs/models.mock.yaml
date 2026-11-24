@@ -1,0 +1,35 @@
+# Mock-Modelle: Fake-Antworten zum kostenlosen Testen der ganzen Pipeline
+#
+#   python -m llm_grader_bias.solve --models-config configs/models.mock.yaml
+#   python -m llm_grader_bias.grade --models-config configs/models.mock.yaml
+#
+# 3 Familien × 2 Größen. Optional pro Modell: extra: {marker: "MARK", bias: 2} baut einen Self-Bias ein,
+# den die Auswertung finden muss.
+
+defaults:
+  provider: mock
+  model: mock
+  temperature: 0.0
+  max_tokens: 2000
+  seed: 1234
+  rpm: 100000
+
+models:
+  - id: mock-a-small
+    family: mock-a
+    size: small
+  - id: mock-a-large
+    family: mock-a
+    size: large
+  - id: mock-b-small
+    family: mock-b
+    size: small
+  - id: mock-b-large
+    family: mock-b
+    size: large
+  - id: mock-c-small
+    family: mock-c
+    size: small
+  - id: mock-c-large
+    family: mock-c
+    size: large

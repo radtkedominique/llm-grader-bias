@@ -38,7 +38,10 @@ llm-grader-bias/
 ├── configs/
 │   ├── dataset.yaml          # Quellen, Fächer, Jahrgänge, Filter
 │   ├── pilot.yaml            # Quoten und Filter der Pilot-Auswahl
-│   └── models.yaml           # Modelle und Zugänge (Azure, Gemini, Anthropic, Ollama, Mock)
+│   ├── models.bedrock.yaml   # Studie: Claude 5.5 + DeepSeek über AWS Bedrock
+│   ├── models.litellm.yaml   # Studie: GPT-6 über den Haufe LiteLLM-Proxy
+│   ├── models.ollama.yaml    # lokal testen (kostenlos)
+│   └── models.mock.yaml      # Fake-Modelle für Pipeline-Tests
 ├── data/                     # NICHT im Git (Urheberrecht, siehe unten)
 │   ├── raw/                  # Original-PDFs, nach Quelle/Fach
 │   ├── interim/              # extrahierter Text pro PDF
@@ -123,14 +126,18 @@ Zum Durchsehen von Hand gibt es pro Aufgabe eine lesbare Fassung unter `data/int
 
 ```bash
 python -m llm_grader_bias.pilot                   # 30 Teilaufgaben, 10 je Aufgabentyp, ab 2024 → data/pilot/
-python -m llm_grader_bias.solve --dry-run         # Aufrufe und Tokens schätzen (für die Kostenfrage)
-python -m llm_grader_bias.solve                   # alle aktivierten Modelle lösen alle Pilot-Aufgaben
-python -m llm_grader_bias.grade --dry-run
-python -m llm_grader_bias.grade                   # alle korrigieren alle, mit und ohne Erwartungshorizont
+python -m llm_grader_bias.solve --models-config configs/models.bedrock.yaml --dry-run   # Kosten schätzen
+
+# erst mit allen Configs lösen, dann mit allen korrigieren
+python -m llm_grader_bias.solve --models-config configs/models.bedrock.yaml
+python -m llm_grader_bias.solve --models-config configs/models.litellm.yaml
+python -m llm_grader_bias.grade --models-config configs/models.bedrock.yaml
+python -m llm_grader_bias.grade --models-config configs/models.litellm.yaml
 ```
 
-- **Modelle** stehen in `configs/models.yaml` (`enabled: true/false`). Schlüssel und Endpoints in `.env` (Vorlage: `.env.example`).
-- **Zugänge:** Azure OpenAI, alles OpenAI-Kompatible (OpenRouter, Ollama, LM Studio, Gemini), Anthropic und `mock`. Die sechs Mock-Modelle sind standardmäßig aktiv, damit sich die Pipeline kostenlos testen lässt.
+- **Modelle:** eine Config pro Zugang, `--models-config` ist Pflicht. Studie: `models.bedrock.yaml` (Claude Haiku/Sonnet/Opus 5.5, DeepSeek V3.1/V3.2) und `models.litellm.yaml` (GPT-6 Luna/Sol/Astra). Schlüssel in `.env` (Vorlage: `.env.example`).
+- **Korrigieren über Configs hinweg:** `grade` nimmt die Korrektoren aus der Config, korrigiert aber alle Lösungen in `solutions.jsonl` und überspringt fertige Bewertungen.
+- **Zugänge (`provider`):** `bedrock` (Converse-API), `openai_compatible` (LiteLLM, Ollama, LM Studio, OpenRouter), `azure`, `anthropic` und `mock`. Kostenlos testen: `models.mock.yaml` (Fake-Antworten) oder `models.ollama.yaml` (lokal).
 - **Cache** unter `data/cache/`: Ein abgebrochener Lauf setzt fort, ohne bezahlte Aufrufe zu wiederholen.
 - **Prompts** in `prompts/` (versioniert, siehe `prompts/README.md`). Lösungen werden vor dem Korrigieren anonymisiert.
 - **Ausgabe:** `solutions.jsonl` (eine Lösung pro Zeile), `gradings.jsonl` (eine Bewertung pro Zeile mit `relation` = self/family/foreign und `score` = Punkte/Maximum).
@@ -143,7 +150,7 @@ python -m llm_grader_bias.solve --models-config configs/models.ollama.yaml      
 python -m llm_grader_bias.grade --models-config configs/models.ollama.yaml
 ```
 
-Erst Mock-Lauf, dann echte Modelle: Mock-Einträge auf `enabled: false`, echte auf `true`, `data/solutions/` und `data/gradings/` leeren.
+Nach Test-Läufen (Mock, Ollama) vor dem echten Lauf `data/solutions/` und `data/gradings/` leeren.
 
 ## Auswertung
 
@@ -164,7 +171,7 @@ Mit den Mock-Modellen geprüft: Einem Mock-Korrektor ist ein Bias für eigene L�
 ```bash
 python -m llm_grader_bias.analysis.descriptive    # Block 1: Datensatz        → results/datensatz/
 python -m llm_grader_bias.analysis.controls       # Block 5: Kontrollen       → results/kontrollen/
-python -m llm_grader_bias.grade --repeats 2       # vorher, für die Wiederholbarkeit
+python -m llm_grader_bias.grade --models-config configs/models.bedrock.yaml --repeats 2   # vorher, für die Wiederholbarkeit (je Config)
 ```
 
 | Block | Grafiken (PNG, 200 dpi) | Tabellen |

@@ -1,0 +1,49 @@
+# Modelle über AWS Bedrock – alle Familien über DENSELBEN Zugang (Converse-API)
+#
+# Schlüssel: AWS_BEDROCK in .env (Bedrock-API-Key). Region: eu-north-1 (Stockholm).
+#
+#   python -m llm_grader_bias.solve --models-config configs/models.bedrock.yaml --dry-run
+#   python -m llm_grader_bias.solve --models-config configs/models.bedrock.yaml --models claude-haiku
+#   python -m llm_grader_bias.solve --models-config configs/models.bedrock.yaml
+#   python -m llm_grader_bias.grade --models-config configs/models.bedrock.yaml
+
+
+defaults:
+  provider: bedrock
+  region: eu-north-1
+  api_key_env: AWS_BEDROCK
+  temperature: 0.0
+  seed: null
+  max_tokens: 4000
+  rpm: 30           # an die Quotas deines Accounts anpassen (Service Quotas → Bedrock)
+  timeout: 300
+
+models:
+  # ---------------------------------------------------------------- Anthropic Claude 5.5
+  - id: claude-haiku
+    family: anthropic
+    size: small
+    model: eu.anthropic.claude-haiku-5-5
+    temperature: null
+  - id: claude-sonnet
+    family: anthropic
+    size: medium
+    model: eu.anthropic.claude-sonnet-5-5
+    temperature: null
+  - id: claude-opus
+    family: anthropic
+    size: large
+    model: eu.anthropic.claude-opus-5-5
+    temperature: null
+
+  # ---------------------------------------------------------------- DeepSeek (gleiche Größe, zwei Versionen)
+  - id: deepseek-v31
+    family: deepseek
+    size: large
+    model: deepseek.v3-v1:0
+    model_version: V3.1
+  - id: deepseek-v32
+    family: deepseek
+    size: large
+    model: deepseek.v3.2
+    model_version: V3.2           # max. 8K Output-Tokens
